@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const User = require('../models/user')
 const helper = require('./test_helper')
 const supertest = require('supertest')
@@ -57,6 +57,25 @@ describe('when there is initially one user in db', () => {
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  test('Wrong password', async () => {
+    const user = { username: 'Wrong', password: 'sekret' }
+    const loggedInUser = await api.post('/api/login').send(user)
+
+    expect(loggedInUser.body.error).toContain('invalid username or password')
+  })
+  test('Wrong username', async () => {
+    const user = { username: 'root', password: 'Wrong' }
+    const loggedInUser = await api.post('/api/login').send(user)
+
+    expect(loggedInUser.body.error).toContain('invalid username or password')
+  })
+  test('User login sucessful, token returned', async () => {
+    const user = { username: 'root', password: 'sekret' }
+    const loggedInUser = await api.post('/api/login').send(user)
+
+    expect(loggedInUser.body.token).toBeDefined()
   })
 })
 

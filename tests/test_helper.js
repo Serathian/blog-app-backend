@@ -1,6 +1,8 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const bcrypt = require('bcryptjs')
 //#region Blog helpers
+
 const initialBlogs = [
   {
     title: 'Test Blog One',
@@ -40,6 +42,15 @@ const blogsInDb = async () => {
 //#endregion
 
 //#region User helpers
+const registerUser = async (user) => {
+  const passwordHash = await bcrypt.hash(user.password, 10)
+  const userObject = new User({
+    username: user.username,
+    passwordHash,
+  })
+  await userObject.save()
+}
+
 const usersInDb = async () => {
   const users = await User.find({})
   return users.map((u) => u.toJSON())
@@ -51,4 +62,5 @@ module.exports = {
   nonExistingId,
   blogsInDb,
   usersInDb,
+  registerUser,
 }
